@@ -1,0 +1,12 @@
+{
+  "name": "illustrator-ai-assistant",
+  "displayName": "Illustrator AI Assistant",
+  "version": "0.1.0",
+  "description": "Turn a reference image into a real, editable vector reconstruction (SVG paths), compare it against the original and report what was not restored. Phase 1: no Illustrator automation is executed; .ai output is prepared as an ExtendScript file and is NOT VERIFIED.",
+  "author": {
+    "name": "jacky4093-hub"
+  },
+  "repository": "https://github.com/jacky4093-hub/illustrator-ai-assistant",
+  "license": "UNLICENSED",
+  "keywords": ["illustrator", "vector", "svg", "vectorization", "image-tracing"]
+}

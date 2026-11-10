@@ -1,0 +1,98 @@
+{
+  "tool": "vector-fidelity",
+  "version": "0.1.0",
+  "generated_at": "2026-11-10T14:34:00+0000",
+  "source": {
+    "path": "examples/images/noise_texture.png",
+    "width": 128,
+    "height": 96,
+    "mode": "RGB"
+  },
+  "analysis": {
+    "width": 128,
+    "height": 96,
+    "aspect_ratio": 1.333333,
+    "unique_colors": 12287,
+    "top8_coverage": 0.000732421875,
+    "top16_coverage": 0.0013834635416666667,
+    "aa_adjusted_coverage": 0.031656901041666664,
+    "smooth_transition_fraction": 0.0005338370565045992,
+    "hard_edge_fraction": 0.9994661629434954,
+    "has_alpha": false,
+    "partial_alpha_fraction": 0.0
+  },
+  "strategy": {
+    "image_class": "photographic",
+    "method": "posterized color-region tracing (low expected fidelity)",
+    "palette_mode": "kmeans",
+    "max_colors": 32,
+    "simplify_epsilons": [
+      0.6,
+      0.35,
+      0.2
+    ],
+    "min_loop_area": 4.0,
+    "human_review_reasons": [
+      "Image looks photographic / highly textured; faithful editable vector reconstruction is not expected. Human must decide whether to continue."
+    ],
+    "expected_limitations": [
+      "photographic texture",
+      "gradients"
+    ]
+  },
+  "thresholds": {
+    "min_pixel_match": 0.97,
+    "max_mean_delta_e": 3.0,
+    "min_color_iou": 0.95,
+    "min_iou_area_share": 0.002
+  },
+  "iterations": [
+    {
+      "iteration": 1,
+      "epsilon": 0.6,
+      "palette_size": 32,
+      "paths": 0,
+      "loops": 0,
+      "points": 0,
+      "dropped_tiny_loops": 11076,
+      "svg_bytes": 320,
+      "svg_validation": {
+        "ok": false,
+        "errors": [
+          "no <path> elements: nothing was vectorized"
+        ],
+        "warnings": [],
+        "path_count": 0,
+        "width": 128.0,
+        "height": 96.0,
+        "viewbox": [
+          0.0,
+          0.0,
+          128.0,
+          96.0
+        ]
+      },
+      "result": "FAIL"
+    }
+  ],
+  "failures": [
+    {
+      "iteration": 1,
+      "stage": "svg_validation",
+      "reasons": [
+        "no <path> elements: nothing was vectorized"
+      ]
+    }
+  ],
+  "outputs": {},
+  "status": {
+    "svg_generated": "FAIL",
+    "svg_valid": "FAIL",
+    "svg_render": "NOT VERIFIED",
+    "fidelity": "NOT VERIFIED",
+    "ai_file": "NOT VERIFIED",
+    "illustrator_script": "NOT VERIFIED",
+    "human_review": "PENDING",
+    "overall": "FAILED"
+  }
+}

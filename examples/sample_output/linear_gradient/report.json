@@ -1,0 +1,512 @@
+{
+  "tool": "vector-fidelity",
+  "version": "0.1.0",
+  "generated_at": "2026-11-10T14:33:59+0000",
+  "source": {
+    "path": "examples/images/linear_gradient.png",
+    "width": 200,
+    "height": 120,
+    "mode": "RGB"
+  },
+  "analysis": {
+    "width": 200,
+    "height": 120,
+    "aspect_ratio": 1.666667,
+    "unique_colors": 200,
+    "top8_coverage": 0.04,
+    "top16_coverage": 0.08,
+    "aa_adjusted_coverage": 0.09,
+    "smooth_transition_fraction": 0.5008389261744967,
+    "hard_edge_fraction": 0.0,
+    "has_alpha": false,
+    "partial_alpha_fraction": 0.0
+  },
+  "strategy": {
+    "image_class": "graphic_with_gradients",
+    "method": "posterized color-region tracing (gradients approximated by flat bands)",
+    "palette_mode": "kmeans",
+    "max_colors": 24,
+    "simplify_epsilons": [
+      0.35,
+      0.2,
+      0.1
+    ],
+    "min_loop_area": 2.0,
+    "human_review_reasons": [
+      "Smooth color transitions detected; phase 1 approximates gradients with flat color bands instead of real vector gradients."
+    ],
+    "expected_limitations": [
+      "gradients"
+    ]
+  },
+  "thresholds": {
+    "min_pixel_match": 0.97,
+    "max_mean_delta_e": 3.0,
+    "min_color_iou": 0.95,
+    "min_iou_area_share": 0.002
+  },
+  "iterations": [
+    {
+      "iteration": 1,
+      "epsilon": 0.35,
+      "palette_size": 24,
+      "paths": 23,
+      "loops": 23,
+      "points": 92,
+      "dropped_tiny_loops": 0,
+      "svg_bytes": 2602,
+      "svg_validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": [],
+        "path_count": 23,
+        "width": 200.0,
+        "height": 120.0,
+        "viewbox": [
+          0.0,
+          0.0,
+          200.0,
+          120.0
+        ]
+      },
+      "renderer": "chromium",
+      "renderer_notes": [],
+      "comparison": {
+        "size_match": true,
+        "mae": 1.875,
+        "rmse": 2.2851,
+        "psnr_db": 40.953,
+        "pixel_match_ratio": 1.0,
+        "mean_delta_e": 1.9307,
+        "p95_delta_e": 4.0415,
+        "color_iou": [
+          {
+            "color": "#515ca3",
+            "area_share": 0.055,
+            "iou": 1.0
+          },
+          {
+            "color": "#f1c22e",
+            "area_share": 0.035,
+            "iou": 1.0
+          },
+          {
+            "color": "#bda154",
+            "area_share": 0.045,
+            "iou": 1.0
+          },
+          {
+            "color": "#aa9562",
+            "area_share": 0.05,
+            "iou": 1.0
+          },
+          {
+            "color": "#938773",
+            "area_share": 0.045,
+            "iou": 1.0
+          },
+          {
+            "color": "#797686",
+            "area_share": 0.04,
+            "iou": 1.0
+          },
+          {
+            "color": "#b49b5b",
+            "area_share": 0.04,
+            "iou": 1.0
+          },
+          {
+            "color": "#2340c4",
+            "area_share": 0.055,
+            "iou": 1.0
+          },
+          {
+            "color": "#3047bb",
+            "area_share": 0.055,
+            "iou": 1.0
+          },
+          {
+            "color": "#5c649b",
+            "area_share": 0.05,
+            "iou": 1.0
+          },
+          {
+            "color": "#ddb53d",
+            "area_share": 0.03,
+            "iou": 1.0
+          },
+          {
+            "color": "#d0ad47",
+            "area_share": 0.04,
+            "iou": 1.0
+          },
+          {
+            "color": "#676a93",
+            "area_share": 0.045,
+            "iou": 1.0
+          },
+          {
+            "color": "#eabe34",
+            "area_share": 0.03,
+            "iou": 1.0
+          },
+          {
+            "color": "#e3ba38",
+            "area_share": 0.03,
+            "iou": 1.0
+          },
+          {
+            "color": "#8a8179",
+            "area_share": 0.035,
+            "iou": 1.0
+          },
+          {
+            "color": "#4555ab",
+            "area_share": 0.05,
+            "iou": 1.0
+          },
+          {
+            "color": "#f8c72a",
+            "area_share": 0.025,
+            "iou": 1.0
+          },
+          {
+            "color": "#3b4eb3",
+            "area_share": 0.045,
+            "iou": 1.0
+          },
+          {
+            "color": "#827c7f",
+            "area_share": 0.04,
+            "iou": 1.0
+          },
+          {
+            "color": "#c7a84d",
+            "area_share": 0.04,
+            "iou": 1.0
+          },
+          {
+            "color": "#9e8e6b",
+            "area_share": 0.055,
+            "iou": 1.0
+          },
+          {
+            "color": "#d7b142",
+            "area_share": 0.025,
+            "iou": 1.0
+          },
+          {
+            "color": "#70708c",
+            "area_share": 0.04,
+            "iou": 1.0
+          }
+        ],
+        "min_color_iou": 1.0,
+        "worst_cells": [
+          {
+            "x": 0,
+            "y": 0,
+            "w": 25,
+            "h": 15,
+            "mean_delta_e": 2.679
+          },
+          {
+            "x": 0,
+            "y": 15,
+            "w": 25,
+            "h": 15,
+            "mean_delta_e": 2.679
+          },
+          {
+            "x": 0,
+            "y": 30,
+            "w": 25,
+            "h": 15,
+            "mean_delta_e": 2.679
+          },
+          {
+            "x": 0,
+            "y": 45,
+            "w": 25,
+            "h": 15,
+            "mean_delta_e": 2.679
+          },
+          {
+            "x": 0,
+            "y": 60,
+            "w": 25,
+            "h": 15,
+            "mean_delta_e": 2.679
+          }
+        ],
+        "checks": {
+          "size_match": true,
+          "pixel_match_ratio": true,
+          "mean_delta_e": true,
+          "min_color_iou": true
+        },
+        "passed": true
+      },
+      "result": "PASS"
+    }
+  ],
+  "failures": [],
+  "outputs": {
+    "svg": "vector.svg",
+    "preview_png": "preview.png",
+    "diff_heatmap": "diff_heatmap.png",
+    "illustrator_script": "illustrator_build.jsx",
+    "ai_file": null,
+    "iteration_svgs": [
+      "iter1.svg"
+    ]
+  },
+  "status": {
+    "svg_generated": "PASS",
+    "svg_valid": "PASS",
+    "svg_render": "PASS (chromium)",
+    "fidelity": "PASS",
+    "ai_file": "NOT VERIFIED",
+    "illustrator_script": "NOT VERIFIED",
+    "gradients": "NOT RESTORED (posterized)",
+    "text": "NOT VERIFIED (no text detection in phase 1)",
+    "human_review": "PENDING",
+    "overall": "AWAITING_HUMAN_REVIEW"
+  },
+  "best_iteration": 1,
+  "final": {
+    "renderer": "chromium",
+    "renderer_cross_check": {
+      "mean_abs_diff": 0.0,
+      "pixels_over_32": 0.0
+    },
+    "palette": [
+      "#515ca3",
+      "#f1c22e",
+      "#bda154",
+      "#aa9562",
+      "#938773",
+      "#797686",
+      "#b49b5b",
+      "#2340c4",
+      "#3047bb",
+      "#5c649b",
+      "#ddb53d",
+      "#d0ad47",
+      "#676a93",
+      "#eabe34",
+      "#e3ba38",
+      "#8a8179",
+      "#4555ab",
+      "#f8c72a",
+      "#3b4eb3",
+      "#827c7f",
+      "#c7a84d",
+      "#9e8e6b",
+      "#d7b142",
+      "#70708c"
+    ],
+    "paths": 23,
+    "loops": 23,
+    "points": 92,
+    "comparison": {
+      "size_match": true,
+      "mae": 1.875,
+      "rmse": 2.2851,
+      "psnr_db": 40.953,
+      "pixel_match_ratio": 1.0,
+      "mean_delta_e": 1.9307,
+      "p95_delta_e": 4.0415,
+      "color_iou": [
+        {
+          "color": "#515ca3",
+          "area_share": 0.055,
+          "iou": 1.0
+        },
+        {
+          "color": "#f1c22e",
+          "area_share": 0.035,
+          "iou": 1.0
+        },
+        {
+          "color": "#bda154",
+          "area_share": 0.045,
+          "iou": 1.0
+        },
+        {
+          "color": "#aa9562",
+          "area_share": 0.05,
+          "iou": 1.0
+        },
+        {
+          "color": "#938773",
+          "area_share": 0.045,
+          "iou": 1.0
+        },
+        {
+          "color": "#797686",
+          "area_share": 0.04,
+          "iou": 1.0
+        },
+        {
+          "color": "#b49b5b",
+          "area_share": 0.04,
+          "iou": 1.0
+        },
+        {
+          "color": "#2340c4",
+          "area_share": 0.055,
+          "iou": 1.0
+        },
+        {
+          "color": "#3047bb",
+          "area_share": 0.055,
+          "iou": 1.0
+        },
+        {
+          "color": "#5c649b",
+          "area_share": 0.05,
+          "iou": 1.0
+        },
+        {
+          "color": "#ddb53d",
+          "area_share": 0.03,
+          "iou": 1.0
+        },
+        {
+          "color": "#d0ad47",
+          "area_share": 0.04,
+          "iou": 1.0
+        },
+        {
+          "color": "#676a93",
+          "area_share": 0.045,
+          "iou": 1.0
+        },
+        {
+          "color": "#eabe34",
+          "area_share": 0.03,
+          "iou": 1.0
+        },
+        {
+          "color": "#e3ba38",
+          "area_share": 0.03,
+          "iou": 1.0
+        },
+        {
+          "color": "#8a8179",
+          "area_share": 0.035,
+          "iou": 1.0
+        },
+        {
+          "color": "#4555ab",
+          "area_share": 0.05,
+          "iou": 1.0
+        },
+        {
+          "color": "#f8c72a",
+          "area_share": 0.025,
+          "iou": 1.0
+        },
+        {
+          "color": "#3b4eb3",
+          "area_share": 0.045,
+          "iou": 1.0
+        },
+        {
+          "color": "#827c7f",
+          "area_share": 0.04,
+          "iou": 1.0
+        },
+        {
+          "color": "#c7a84d",
+          "area_share": 0.04,
+          "iou": 1.0
+        },
+        {
+          "color": "#9e8e6b",
+          "area_share": 0.055,
+          "iou": 1.0
+        },
+        {
+          "color": "#d7b142",
+          "area_share": 0.025,
+          "iou": 1.0
+        },
+        {
+          "color": "#70708c",
+          "area_share": 0.04,
+          "iou": 1.0
+        }
+      ],
+      "min_color_iou": 1.0,
+      "worst_cells": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 25,
+          "h": 15,
+          "mean_delta_e": 2.679
+        },
+        {
+          "x": 0,
+          "y": 15,
+          "w": 25,
+          "h": 15,
+          "mean_delta_e": 2.679
+        },
+        {
+          "x": 0,
+          "y": 30,
+          "w": 25,
+          "h": 15,
+          "mean_delta_e": 2.679
+        },
+        {
+          "x": 0,
+          "y": 45,
+          "w": 25,
+          "h": 15,
+          "mean_delta_e": 2.679
+        },
+        {
+          "x": 0,
+          "y": 60,
+          "w": 25,
+          "h": 15,
+          "mean_delta_e": 2.679
+        }
+      ],
+      "checks": {
+        "size_match": true,
+        "pixel_match_ratio": true,
+        "mean_delta_e": true,
+        "min_color_iou": true
+      },
+      "passed": true
+    }
+  },
+  "unrestored": [
+    "Gradients: approximated by flat posterized bands; no vector gradient objects were created.",
+    "Text: no text detection/OCR in phase 1; any lettering is traced as shapes, not editable text objects.",
+    "Curves: output uses straight line segments (polylines); no Bezier curve fitting in phase 1."
+  ],
+  "illustrator": {
+    "backend": "script-export",
+    "available": true,
+    "executes_illustrator": false,
+    "verification": "NOT VERIFIED",
+    "detail": "Script written to illustrator_build.jsx. It must be run manually in Adobe Illustrator on Windows; .ai/.svg/.png exports from Illustrator are not verified."
+  },
+  "human_review": {
+    "status": "PENDING",
+    "reasons": [
+      "Smooth color transitions detected; phase 1 approximates gradients with flat color bands instead of real vector gradients.",
+      "Every result requires human visual confirmation before use."
+    ],
+    "reviewer": null,
+    "note": null,
+    "decided_at": null
+  },
+  "elapsed_seconds": 1.23
+}

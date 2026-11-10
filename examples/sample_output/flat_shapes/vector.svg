@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="160" viewBox="0 0 240 160" shape-rendering="geometricPrecision">
+  <title>vector-fidelity reconstruction</title>
+  <rect id="background" x="0" y="0" width="240" height="160" fill="#ffffff"/>
+  <g id="regions">
+    <path id="region-000" fill="#dc2828" fill-rule="evenodd" d="M65 30 L72 30.5 L77 31.5 L83 33.5 L93 39.5 L100.5 47 L101.5 49 L103.5 51 L106.5 57 L109.5 67 L110 75 L109.5 83 L107.5 91 L103.5 99 L101.5 102 L98.5 105 L97.5 107 L89 113.5 L81 117.5 L73 119.5 L65 120 L57 119.5 L53 118.5 L47 116.5 L38 111.5 L29.5 103 L25.5 97 L21.5 87 L20 75.5 L20.5 69 L22.5 60 L27.5 50 L29.5 48 L30.5 46 L37 39.5 L45 34.5 L50 32.5 L58 30.5 Z"/>
+    <path id="region-001" fill="#1e5ac8" fill-rule="evenodd" d="M130 25 L210 25 L210 75 L130 75 Z"/>
+    <path id="region-002" fill="#28a046" fill-rule="evenodd" d="M182.5 88 L187.5 95 L191.5 99 L192.5 101 L196.5 105 L197.5 107 L206.5 117 L207.5 119 L215.5 128 L216.5 130 L220.5 134 L224 139 L183 140 L142 140 L142.5 137 L144.5 135 L145.5 133 L148.5 130 L149.5 128 L152.5 125 L157.5 118 L161.5 114 L162.5 112 L165.5 109 L166.5 107 L169.5 104 L170.5 102 L173.5 99 L178.5 92 Z"/>
+  </g>
+</svg>

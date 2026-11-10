@@ -1,0 +1,4 @@
+# Runtime (phase 1). Install only with explicit approval.
+numpy>=1.24
+Pillow>=10.0
+# Optional independent renderer (Node.js side): playwright + Chromium

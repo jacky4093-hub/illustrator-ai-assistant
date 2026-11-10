@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="96" viewBox="0 0 128 96" shape-rendering="geometricPrecision">
+  <title>vector-fidelity reconstruction</title>
+  <rect id="background" x="0" y="0" width="128" height="96" fill="#8e2c2a"/>
+  <g id="regions">
+  </g>
+</svg>

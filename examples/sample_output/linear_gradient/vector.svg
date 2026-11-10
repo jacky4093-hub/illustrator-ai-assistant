@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="120" viewBox="0 0 200 120" shape-rendering="geometricPrecision">
+  <title>vector-fidelity reconstruction</title>
+  <rect id="background" x="0" y="0" width="200" height="120" fill="#9e8e6b"/>
+  <g id="regions">
+    <path id="region-000" fill="#515ca3" fill-rule="evenodd" d="M41 0 L52 0 L52 120 L41 120 Z"/>
+    <path id="region-001" fill="#2340c4" fill-rule="evenodd" d="M0 0 L11 0 L11 120 L0 120 Z"/>
+    <path id="region-002" fill="#3047bb" fill-rule="evenodd" d="M11 0 L22 0 L22 120 L11 120 Z"/>
+    <path id="region-003" fill="#5c649b" fill-rule="evenodd" d="M52 0 L62 0 L62 120 L52 120 Z"/>
+    <path id="region-004" fill="#4555ab" fill-rule="evenodd" d="M31 0 L41 0 L41 120 L31 120 Z"/>
+    <path id="region-005" fill="#aa9562" fill-rule="evenodd" d="M122 0 L132 0 L132 120 L122 120 Z"/>
+    <path id="region-006" fill="#3b4eb3" fill-rule="evenodd" d="M22 0 L31 0 L31 120 L22 120 Z"/>
+    <path id="region-007" fill="#676a93" fill-rule="evenodd" d="M62 0 L71 0 L71 120 L62 120 Z"/>
+    <path id="region-008" fill="#938773" fill-rule="evenodd" d="M102 0 L111 0 L111 120 L102 120 Z"/>
+    <path id="region-009" fill="#bda154" fill-rule="evenodd" d="M140 0 L149 0 L149 120 L140 120 Z"/>
+    <path id="region-010" fill="#d0ad47" fill-rule="evenodd" d="M157 0 L165 0 L165 120 L157 120 Z"/>
+    <path id="region-011" fill="#70708c" fill-rule="evenodd" d="M71 0 L79 0 L79 120 L71 120 Z"/>
+    <path id="region-012" fill="#b49b5b" fill-rule="evenodd" d="M132 0 L140 0 L140 120 L132 120 Z"/>
+    <path id="region-013" fill="#c7a84d" fill-rule="evenodd" d="M149 0 L157 0 L157 120 L149 120 Z"/>
+    <path id="region-014" fill="#827c7f" fill-rule="evenodd" d="M87 0 L95 0 L95 120 L87 120 Z"/>
+    <path id="region-015" fill="#797686" fill-rule="evenodd" d="M79 0 L87 0 L87 120 L79 120 Z"/>
+    <path id="region-016" fill="#8a8179" fill-rule="evenodd" d="M95 0 L102 0 L102 120 L95 120 Z"/>
+    <path id="region-017" fill="#f1c22e" fill-rule="evenodd" d="M188 0 L195 0 L195 120 L188 120 Z"/>
+    <path id="region-018" fill="#ddb53d" fill-rule="evenodd" d="M170 0 L176 0 L176 120 L170 120 Z"/>
+    <path id="region-019" fill="#e3ba38" fill-rule="evenodd" d="M176 0 L182 0 L182 120 L176 120 Z"/>
+    <path id="region-020" fill="#eabe34" fill-rule="evenodd" d="M182 0 L188 0 L188 120 L182 120 Z"/>
+    <path id="region-021" fill="#f8c72a" fill-rule="evenodd" d="M195 0 L200 0 L200 120 L195 120 Z"/>
+    <path id="region-022" fill="#d7b142" fill-rule="evenodd" d="M165 0 L170 0 L170 120 L165 120 Z"/>
+  </g>
+</svg>
