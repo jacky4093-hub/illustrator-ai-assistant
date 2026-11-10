@@ -281,6 +281,69 @@ class TestJsxSafety(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertEqual(json.loads(r.stdout), {"created": 0, "alerts": 1})
 
+    def test_export_order_svg_png_then_save_ai(self):
+        """SVG export, then PNG export, then save .ai as the last document
+        operation (order verified on Illustrator 2021 / Windows; this test only
+        checks the generated script, not Illustrator itself)."""
+        ai, sv, pn = (str(self.tmp / n) for n in ("a.ai", "a.svg", "a.png"))
+        jsx = build_jsx(self.doc, ai, sv, pn)
+
+        # Static checks on the script text.
+        self.assertEqual(jsx.count("doc.exportFile("), 2)
+        self.assertEqual(jsx.count("ExportType.SVG"), 1)
+        self.assertEqual(jsx.count("ExportType.PNG24"), 1)
+        self.assertEqual(jsx.count("saveAs("), 1)
+        i_guard = jsx.index(".exists")
+        i_create = jsx.index("app.documents.add(")
+        i_svg = jsx.index("doc.exportFile(new File(OUT_SVG), ExportType.SVG")
+        i_png = jsx.index("doc.exportFile(new File(OUT_PNG), ExportType.PNG24")
+        i_ai = jsx.index("doc.saveAs(new File(OUT_AI)")
+        self.assertLess(i_guard, i_create)
+        self.assertLess(i_create, i_svg)
+        self.assertLess(i_svg, i_png)
+        self.assertLess(i_png, i_ai)
+
+        if not shutil.which("node"):
+            self.skipTest("node not available for the execution-order simulation")
+        # Execution order with a minimal ExtendScript stub (simulation only;
+        # real Illustrator behaviour was verified separately on Windows).
+        stub = r"""
+var log = [];
+function File(p){ this.path = p; log.push("exists-check"); this.exists = false; }
+function alert(m){ log.push("alert"); }
+function RGBColor(){}
+function IllustratorSaveOptions(){}
+function ExportOptionsSVG(){}
+function ExportOptionsPNG24(){}
+var DocumentColorSpace = {RGB: "RGB"};
+var ExportType = {SVG: "SVG", PNG24: "PNG24"};
+function mkPath(){ return {setEntirePath: function(){}}; }
+var doc = {
+  artboards: [{}],
+  layers: [{
+    pathItems: {rectangle: function(){ return {}; }, add: mkPath},
+    compoundPathItems: {add: function(){ return {pathItems: {add: mkPath}}; }}
+  }],
+  exportFile: function(f, t){ log.push("export:" + t + ":" + f.path); },
+  saveAs: function(f){ log.push("saveAs:" + f.path); },
+  close: function(){ log.push("close"); }
+};
+var app = {documents: {add: function(){ log.push("documents.add"); return doc; }}};
+"""
+        body = "\n".join(l for l in jsx.splitlines() if not l.startswith("#"))
+        tail = "\nconsole.log(JSON.stringify(log));"
+        r = subprocess.run(["node", "-e", stub + body + tail], capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        log = json.loads(r.stdout)
+        fwd = lambda p: p.replace("\\", "/")  # noqa: E731
+        i_add = log.index("documents.add")
+        # Conflict check (3 File.exists probes, no alert) happens before creation.
+        self.assertEqual(log[:i_add], ["exists-check"] * 3)
+        ops = [e for e in log if e.startswith(("export:", "saveAs:", "close"))]
+        self.assertEqual(ops, [f"export:SVG:{fwd(sv)}", f"export:PNG24:{fwd(pn)}",
+                               f"saveAs:{fwd(ai)}"])
+        self.assertTrue(log[-1].startswith("saveAs:"), log[-1])
+
 
 if __name__ == "__main__":
     unittest.main()
