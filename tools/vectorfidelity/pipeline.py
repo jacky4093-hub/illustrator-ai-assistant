@@ -12,7 +12,7 @@ from . import __version__
 from .analyze import (assign_labels, assign_labels_spatial, build_palette, choose_strategy, classify,
                       compute_stats, stats_to_dict)
 from .compare import Thresholds, compare_images
-from .illustrator import build_jsx, get_bridge
+from .illustrator import IllustratorBridge, build_jsx, get_bridge
 from .imageio import load_image, save_rgb
 from .outputs import ILLUSTRATOR_TARGETS, MAX_ITERATION_FILES, plan_outputs
 from .render import render, render_internal
@@ -37,14 +37,54 @@ def _overall_and_outcome(fidelity_passed: bool, limitations: list[str]) -> tuple
     return "AWAITING_HUMAN_REVIEW", OUTCOME_METRICS_PASS
 
 
+class BridgeUnavailableError(RuntimeError):
+    """An Illustrator run was requested but the backend cannot be used here."""
+
+
+def _illustrator_status(bstatus) -> tuple[str, str]:
+    """(ai_file, illustrator_script) status strings. Never "PASS": a file
+    that exists is not a verified .ai file."""
+    run = bstatus.run
+    if not run:
+        return "NOT VERIFIED", "NOT VERIFIED"
+    state = run["state"]
+    if state == "RETURNED_FILES_PRESENT":
+        return ("NOT VERIFIED (file created by Illustrator; not yet confirmed to open "
+                "with editable vectors)", "EXECUTED (Illustrator returned)")
+    if state == "RETURNED_FILES_MISSING":
+        return "FAIL (Illustrator returned but outputs are missing)", "EXECUTED (outputs missing)"
+    if state == "SCRIPT_ERROR":
+        return "FAIL (Illustrator script error)", "FAIL (script error; not retried)"
+    if state == "UNKNOWN_TIMEOUT":
+        return ("NOT VERIFIED (execution state unknown after timeout)",
+                "UNKNOWN (timeout; Illustrator may still be running)")
+    if state in ("REFUSED_PRECHECK", "REFUSED_BY_LAUNCHER"):
+        return "NOT VERIFIED (Illustrator run refused)", "NOT EXECUTED (refused)"
+    return "NOT VERIFIED (launcher state unknown)", "UNKNOWN (launcher failure)"
+
+
 def _score(comp) -> float:
     return comp.pixel_match_ratio + comp.min_color_iou - comp.mean_delta_e / 100.0
 
 
 def run(image_path: str | Path, out_dir: str | Path, max_iterations: int = 3,
         renderer: str = "chromium", thresholds: Thresholds | None = None,
-        force: bool = False) -> dict:
+        force: bool = False, bridge: IllustratorBridge | None = None,
+        illustrator_approved_by: str | None = None) -> dict:
+    """``bridge`` defaults to script export (Illustrator is not contacted).
+    Passing an executing bridge runs Illustrator once and requires
+    ``illustrator_approved_by`` (the human who approved this run)."""
     t0 = time.time()
+    if bridge is None:
+        bridge = get_bridge("script-export")
+    probe = bridge.probe()
+    if probe.executes_illustrator:
+        # Checked before anything is created or written.
+        if not (illustrator_approved_by or "").strip():
+            raise BridgeUnavailableError(
+                "running Illustrator requires explicit human approval (approver name missing)")
+        if not probe.available:
+            raise BridgeUnavailableError(f"{probe.backend} unavailable: {probe.detail}")
     max_iterations = max(1, min(int(max_iterations), MAX_ITERATIONS_CAP))
     # All safety checks happen before anything is created or written;
     # raises outputs.OutputConflictError on any conflict.
@@ -156,7 +196,6 @@ def run(image_path: str | Path, out_dir: str | Path, max_iterations: int = 3,
         cross = {"mean_abs_diff": round(float(d.mean()), 4),
                  "pixels_over_32": round(float((d.max(-1) > 32).mean()), 6)}
 
-    bridge = get_bridge("script-export")
     jsx_path = plan.path("illustrator_build.jsx")
     ai_t, svg_t, png_t = (str((out / n).resolve()) for n in ILLUSTRATOR_TARGETS)
     jsx = build_jsx(best["doc"], ai_t, svg_t, png_t)  # refuses existing targets
@@ -202,6 +241,9 @@ def run(image_path: str | Path, out_dir: str | Path, max_iterations: int = 3,
     }
     result["unrestored"] = unrestored
     result["illustrator"] = bstatus.to_dict()
+    if bstatus.run:
+        result["illustrator"]["approved_by"] = illustrator_approved_by
+    ai_status, script_status = _illustrator_status(bstatus)
     result["human_review"] = {"status": "PENDING", "reasons": review_reasons,
                               "reviewer": None, "note": None, "decided_at": None}
     limitations = list(strategy.expected_limitations)
@@ -219,8 +261,8 @@ def run(image_path: str | Path, out_dir: str | Path, max_iterations: int = 3,
         "svg_valid": "PASS" if best["validation"].ok else "FAIL",
         "svg_render": f"PASS ({best['renderer']})",
         "fidelity": fidelity,
-        "ai_file": "NOT VERIFIED",
-        "illustrator_script": "NOT VERIFIED",
+        "ai_file": ai_status,
+        "illustrator_script": script_status,
         "gradients": ("NOT RESTORED (posterized)" if "gradients" in strategy.expected_limitations
                       else "none detected"),
         "text": "NOT VERIFIED (no text detection in phase 1)",

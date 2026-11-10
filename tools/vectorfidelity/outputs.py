@@ -29,6 +29,10 @@ MANAGED_FILES = (
 )
 ILLUSTRATOR_TARGETS = ("illustrator_output.ai", "illustrator_output.svg",
                        "illustrator_output.png")
+# Record of an automated Illustrator run attempt. Its presence blocks any
+# further run in the same folder (no automatic retry), even with force.
+ILLUSTRATOR_RUN_RECORD = "illustrator_run.json"
+NEVER_OVERWRITTEN = ILLUSTRATOR_TARGETS + (ILLUSTRATOR_RUN_RECORD,)
 
 
 class OutputConflictError(RuntimeError):
@@ -81,7 +85,7 @@ def plan_outputs(source: str | Path, out_dir: str | Path, force: bool = False) -
     conflicts: list[str] = []
     # Source protection: applies regardless of force and of whether the
     # directory exists yet (it may be reached through a symlinked parent).
-    for name in MANAGED_FILES + list(ILLUSTRATOR_TARGETS):
+    for name in MANAGED_FILES + list(NEVER_OVERWRITTEN):
         target = out / name
         if _same_file(target, src):
             conflicts.append(f"{name}: resolves to the source image")
@@ -105,8 +109,8 @@ def plan_outputs(source: str | Path, out_dir: str | Path, force: bool = False) -
 
     for name in entries:
         target = out / name
-        if name in ILLUSTRATOR_TARGETS:
-            conflicts.append(f"{name}: Illustrator output is never overwritten")
+        if name in NEVER_OVERWRITTEN:
+            conflicts.append(f"{name}: Illustrator output / run record is never overwritten")
         elif name in MANAGED_FILES:
             if target.is_symlink():
                 conflicts.append(f"{name}: is a symbolic link; refusing to write through it")

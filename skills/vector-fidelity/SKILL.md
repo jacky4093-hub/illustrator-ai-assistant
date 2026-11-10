@@ -18,10 +18,11 @@ the report must then say FAIL.
 2. Do **not** install packages, MCP servers or global tools without explicit
    human approval. Required: Python 3.10+ with `numpy` and `Pillow`.
    Optional: Node.js + Playwright Chromium (independent SVG renderer).
-3. Never report the `.ai` file as created or verified. Phase 1 does not run
-   Adobe Illustrator. It only writes `illustrator_build.jsx`, whose status is
-   always `NOT VERIFIED` until it has been run in Illustrator on Windows and
-   the result has been checked.
+3. Never report the `.ai` file as verified. By default Adobe Illustrator is
+   not run at all; only `illustrator_build.jsx` is written. Even after an
+   Illustrator run (see "Running Illustrator on Windows"), a file that exists
+   is not proof: `ai_file` stays `NOT VERIFIED` until a human has opened the
+   `.ai` in Illustrator and confirmed it contains editable vector paths.
 4. Use the three result labels exactly: **PASS** (there is test evidence),
    **FAIL** (a check failed), **NOT VERIFIED** (not tested).
 5. At most 3 refinement iterations by default (hard cap 5).
@@ -72,6 +73,36 @@ The scripts live in the plugin root, two directories above this file:
    Approval never changes `ai_file` from NOT VERIFIED, and approving a result
    with known gaps yields `APPROVED_WITH_KNOWN_GAPS` (gaps stay listed).
 
+## Running Illustrator on Windows (optional, needs approval every time)
+
+Only on a Windows machine with Adobe Illustrator installed, in a Claude Code
+session running on that machine. A cloud or remote Linux session cannot
+control Illustrator; there `--run-illustrator` is refused (exit 4).
+
+1. Finish the normal workflow first and show the user the report.
+2. **Ask the user** each time, before running anything: "Run this script in
+   Illustrator now? Please save and close all other Illustrator documents
+   first." Do not proceed without a clear yes in this conversation. An
+   earlier approval for another image or folder does not count.
+3. Run in a **new** output folder, with the approver's name:
+   `python <root>/tools/vf.py run <image> --out <new_dir> --run-illustrator --approved-by "<name>"`
+4. Read `illustrator_run` in the printed JSON and report it as is:
+   - `RETURNED_FILES_PRESENT`: Illustrator returned and the three files
+     exist. Say exactly that. The `.ai` is still NOT VERIFIED; ask the user
+     to open it and check the paths are editable.
+   - `REFUSED_BY_LAUNCHER` / `REFUSED_PRECHECK`: nothing ran (for example
+     other documents are open, or an output file exists). Tell the user why.
+   - `SCRIPT_ERROR`, `RETURNED_FILES_MISSING`: report as FAIL with the error.
+   - `UNKNOWN_TIMEOUT`, `UNKNOWN_LAUNCHER_FAILURE`: say the state of
+     Illustrator is unknown; it may still be working or waiting on a dialog.
+     Ask the user to look at Illustrator.
+5. After any failure, refusal after start, or timeout: **stop**. Never retry
+   on your own, never close documents, never quit or kill Illustrator, never
+   delete the output folder (it is the evidence). Wait for the user.
+6. Never call `tools/illustrator/run_illustrator_jsx.ps1` directly, never
+   run any other `.jsx`, and never edit `illustrator_build.jsx`: edited or
+   foreign scripts are refused by the integrity check.
+
 ## Fidelity thresholds (defaults)
 
 | Metric | Threshold |
@@ -87,7 +118,8 @@ artwork". Always add your own visual judgement.
 
 `vector.svg`, `preview.png` (render of the SVG), `diff_heatmap.png`,
 `report.json`, `report.md`, `illustrator_build.jsx` (NOT VERIFIED),
-`iterN.svg` for each iteration.
+`iterN.svg` for each iteration. After an Illustrator run also
+`illustrator_run.json` (run record) and `illustrator_output.ai/.svg/.png`.
 
 ## Known phase-1 limits (always mention the relevant ones)
 
@@ -96,5 +128,6 @@ artwork". Always add your own visual judgement.
 - No text detection: lettering is traced as shapes, not editable text.
 - Transparency is composited on white.
 - Sharp corners next to diagonal edges can be slightly shifted (< 1 px).
-- The `.jsx` → Illustrator path, `.ai` saving and Illustrator SVG/PNG export
-  have never been executed: NOT VERIFIED.
+- The automated Windows COM run is only simulated in the test suite. Treat
+  every real run as unverified until the user has inspected the `.ai` file.
+- Illustrator's exported PNG is not yet compared with the original.

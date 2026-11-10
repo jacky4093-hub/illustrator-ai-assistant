@@ -23,8 +23,17 @@ def _md(result: dict) -> str:
         L += ["", "> **Not a full success:** known unrestored aspects: "
               + ", ".join(result["known_gaps"])
               + ". Metric PASS does not mean these were restored; human approval does not remove them."]
-    L += ["", "> `ai_file` is NOT VERIFIED: phase 1 never runs Adobe Illustrator. "
-          "`illustrator_build.jsx` is generated for manual execution only.", ""]
+    ill = result.get("illustrator") or {}
+    run = ill.get("run")
+    if run:
+        L += ["", f"> **Illustrator run** (backend `{ill.get('backend')}`, approved by "
+              f"{ill.get('approved_by')}): state `{run.get('state')}`, attempts "
+              f"{run.get('attempts')}, retried: no. {ill.get('detail')}",
+              "> `ai_file` is never marked PASS automatically. Files existing is not proof: "
+              "a human must open the .ai in Illustrator and confirm editable vector paths.", ""]
+    else:
+        L += ["", "> `ai_file` is NOT VERIFIED: Adobe Illustrator was not run. "
+              "`illustrator_build.jsx` is generated for manual execution only.", ""]
 
     fin = result.get("final")
     if fin:

@@ -10,7 +10,10 @@ document coordinates) must be confirmed on a real Windows machine.
 
 from __future__ import annotations
 
+import hashlib
 import json
+import os
+import re
 
 from ..outputs import check_illustrator_targets
 from ..trace import VectorDocument
@@ -132,3 +135,70 @@ def build_jsx(doc: VectorDocument, out_ai: str, out_svg: str, out_png: str,
     for k, v in rep.items():
         text = text.replace(k, v)
     return text
+
+
+# --------------------------------------------------------------------------
+# Integrity verification (used before any automated Illustrator run)
+# --------------------------------------------------------------------------
+# A generated script consists of a fixed code "skeleton" plus six data lines
+# (size, three output paths, background, regions) at fixed positions. A file
+# is accepted only when the skeleton is byte-identical to this tool's
+# template and every data line is a plain literal of the expected shape, so
+# arbitrary ExtendScript cannot pass. tools/illustrator/run_illustrator_jsx.ps1
+# repeats the same checks on the Windows side.
+
+JSX_FILENAME = "illustrator_build.jsx"
+TARGET_NAMES = ("illustrator_output.ai", "illustrator_output.svg", "illustrator_output.png")
+DATA_LINE_INDEXES = (5, 6, 7, 8, 9, 10)  # 0-based
+DATA_LINE_PATTERNS = (
+    r'^    var W = \d+, H = \d+;$',
+    r'^    var OUT_AI = "(?:[^"\\]|\\.)*";$',
+    r'^    var OUT_SVG = "(?:[^"\\]|\\.)*";$',
+    r'^    var OUT_PNG = "(?:[^"\\]|\\.)*";$',
+    r'^    var BG = \[\d+, \d+, \d+\];$',
+    r'^    var REGIONS = \[(?:\{"color":\[\d+,\d+,\d+\],"loops":\[(?:\[(?:\[-?\d+(?:\.\d+)?,-?\d+(?:\.\d+)?\],?)+\],?)+\]\},?)*\];$',
+)
+
+
+def normalize_jsx(text: str) -> str:
+    return text.replace("\r\n", "\n")
+
+
+def jsx_sha256(text: str) -> str:
+    return hashlib.sha256(normalize_jsx(text).encode("utf-8")).hexdigest()
+
+
+def _skeleton(lines: list[str]) -> str:
+    return "\n".join(l for i, l in enumerate(lines) if i not in DATA_LINE_INDEXES)
+
+
+def skeleton_sha256() -> str:
+    """SHA-256 of the template with the six data lines removed."""
+    return hashlib.sha256(_skeleton(_TEMPLATE.split("\n")).encode("utf-8")).hexdigest()
+
+
+def verify_jsx_text(text: str, jsx_dir: str) -> list[str]:
+    """Return a list of problems; empty means the text is a script generated
+    by this tool whose three export targets are inside ``jsx_dir``."""
+    errors: list[str] = []
+    lines = normalize_jsx(text).split("\n")
+    if len(lines) <= max(DATA_LINE_INDEXES):
+        return ["script is too short to be a generated build script"]
+    for idx, pat in zip(DATA_LINE_INDEXES, DATA_LINE_PATTERNS):
+        if not re.match(pat, lines[idx]):
+            errors.append(f"line {idx + 1} is not an expected data literal")
+    if hashlib.sha256(_skeleton(lines).encode("utf-8")).hexdigest() != skeleton_sha256():
+        errors.append("script code differs from this tool's template")
+    if errors:
+        return errors
+    base = os.path.abspath(jsx_dir).replace("\\", "/").rstrip("/")
+    for idx, name in zip(DATA_LINE_INDEXES[1:4], TARGET_NAMES):
+        literal = lines[idx].split(" = ", 1)[1][:-1]
+        try:
+            value = json.loads(literal)
+        except ValueError:
+            errors.append(f"line {idx + 1}: output path is not a valid string literal")
+            continue
+        if os.path.normcase(value) != os.path.normcase(f"{base}/{name}"):
+            errors.append(f"line {idx + 1}: output path is not {name} inside the script's folder")
+    return errors
