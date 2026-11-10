@@ -93,6 +93,11 @@ control Illustrator; there `--run-illustrator` is refused (exit 4).
    - `REFUSED_BY_LAUNCHER` / `REFUSED_PRECHECK`: nothing ran (for example
      other documents are open, or an output file exists). Tell the user why.
    - `SCRIPT_ERROR`, `RETURNED_FILES_MISSING`: report as FAIL with the error.
+     An error starting with `VF_EXPORT_MISSING` means Illustrator returned
+     from an export or save without writing that file (seen once for the PNG
+     on Illustrator 2021; cause not verified). The other files and the open
+     document are left as they are; do not save or retry. Suggest the user
+     restarts Illustrator before a new, separately approved run.
    - `UNKNOWN_TIMEOUT`, `UNKNOWN_LAUNCHER_FAILURE`: say the state of
      Illustrator is unknown; it may still be working or waiting on a dialog.
      Ask the user to look at Illustrator.
@@ -131,3 +136,6 @@ artwork". Always add your own visual judgement.
 - The automated Windows COM run is only simulated in the test suite. Treat
   every real run as unverified until the user has inspected the `.ai` file.
 - Illustrator's exported PNG is not yet compared with the original.
+- Illustrator 2021 once returned from the PNG export without writing the file
+  or raising an error (cause not verified). The script now reports this as
+  `VF_EXPORT_MISSING`; it does not wait for late files and never retries.

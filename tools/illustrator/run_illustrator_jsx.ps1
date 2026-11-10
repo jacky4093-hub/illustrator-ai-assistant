@@ -19,7 +19,8 @@
 #     only what happened; opening and inspecting the .ai is a human step.
 #
 # Exit codes: 0 = script returned, 2 = refused (Illustrator not asked to run
-# the script), 3 = Illustrator reported a script error.
+# the script), 3 = Illustrator reported a script error (including the
+# script's own "VF_EXPORT_MISSING" check when an export wrote no file).
 # Results: refusals and -ValidateOnly print one JSON object to stdout; an
 # actual run writes illustrator_run.json (-ResultPath) next to the script.
 #
@@ -36,7 +37,7 @@ Set-StrictMode -Version 2.0
 $ErrorActionPreference = 'Stop'
 
 # Must equal vectorfidelity.illustrator.jsx.skeleton_sha256() (checked by tests).
-$SkeletonSha256 = '9109b7e0578de786840f9afb9533267877727e748b0ea82ef87774bde27eb16b'
+$SkeletonSha256 = '7debca98fe0679869c90001645115494155896d3c02439b5242efc45e781acec'
 
 $JsxFileName = 'illustrator_build.jsx'
 $RunRecordName = 'illustrator_run.json'

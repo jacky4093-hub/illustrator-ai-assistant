@@ -308,8 +308,8 @@ class TestJsxSafety(unittest.TestCase):
         # Execution order with a minimal ExtendScript stub (simulation only;
         # real Illustrator behaviour was verified separately on Windows).
         stub = r"""
-var log = [];
-function File(p){ this.path = p; log.push("exists-check"); this.exists = false; }
+var log = [], written = {};
+function File(p){ this.path = p; log.push("exists-check"); this.exists = !!written[p]; }
 function alert(m){ log.push("alert"); }
 function RGBColor(){}
 function IllustratorSaveOptions(){}
@@ -324,8 +324,8 @@ var doc = {
     pathItems: {rectangle: function(){ return {}; }, add: mkPath},
     compoundPathItems: {add: function(){ return {pathItems: {add: mkPath}}; }}
   }],
-  exportFile: function(f, t){ log.push("export:" + t + ":" + f.path); },
-  saveAs: function(f){ log.push("saveAs:" + f.path); },
+  exportFile: function(f, t){ log.push("export:" + t + ":" + f.path); written[f.path] = true; },
+  saveAs: function(f){ log.push("saveAs:" + f.path); written[f.path] = true; },
   close: function(){ log.push("close"); }
 };
 var app = {documents: {add: function(){ log.push("documents.add"); return doc; }}};
@@ -342,7 +342,9 @@ var app = {documents: {add: function(){ log.push("documents.add"); return doc; }
         ops = [e for e in log if e.startswith(("export:", "saveAs:", "close"))]
         self.assertEqual(ops, [f"export:SVG:{fwd(sv)}", f"export:PNG24:{fwd(pn)}",
                                f"saveAs:{fwd(ai)}"])
-        self.assertTrue(log[-1].startswith("saveAs:"), log[-1])
+        # saveAs stays the last document operation (only the post-save file
+        # existence check follows it).
+        self.assertTrue(ops[-1].startswith("saveAs:"), ops[-1])
 
 
 if __name__ == "__main__":

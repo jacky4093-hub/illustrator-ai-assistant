@@ -65,7 +65,17 @@ if mode == "error":
     rec.update(status="SCRIPT_ERROR", error="Error 1302: No such element")
     json.dump(rec, open(result, "w"))
     sys.exit(3)
-names = ["illustrator_output.svg", "illustrator_output.png"]
+if mode == "export_missing":
+    # The script's own check: SVG and AI written, PNG export returned silently.
+    for n in ("illustrator_output.svg", "illustrator_output.ai"):
+        with open(os.path.join(d, n), "wb") as f:
+            f.write(b"simulated")
+    rec.update(status="SCRIPT_ERROR",
+               error="VF_EXPORT_MISSING: Illustrator returned without writing: PNG "
+                     + os.path.join(d, "illustrator_output.png").replace("\\", "/"))
+    json.dump(rec, open(result, "w"))
+    sys.exit(3)
+names =["illustrator_output.svg", "illustrator_output.png"]
 if mode != "missing":
     names.append("illustrator_output.ai")
 for n in names:
@@ -195,6 +205,22 @@ class TestSimulatedRuns(SimulatedLauncherCase):
         # bridge's own guard.
         return build_jsx(_doc(), *(str(self.out / n) for n in TARGETS), check_existing=False)
 
+    def test_export_missing_error_is_fail_and_not_retried(self):
+        st = self.bridge("export_missing").build(self.jsx(), self.out / "illustrator_build.jsx")
+        self.assertEqual(st.run["state"], "SCRIPT_ERROR")
+        self.assertEqual(st.verification, "FAIL")
+        self.assertIn("VF_EXPORT_MISSING", st.detail)
+        self.assertIn("PNG", st.detail)
+        self.assertEqual((st.run["attempts"], st.run["retried"]), (1, False))
+        self.assertEqual(len(self.launches()), 1)
+        # Evidence is kept and a second run in the same folder is refused.
+        self.assertEqual(sorted(os.listdir(self.out)),
+                         ["illustrator_build.jsx", "illustrator_output.ai",
+                          "illustrator_output.svg", "illustrator_run.json"])
+        st2 = self.bridge("ok").build(self.jsx_text_for_retry(), self.out / "illustrator_build.jsx")
+        self.assertEqual(st2.run["state"], "REFUSED_PRECHECK")
+        self.assertEqual(len(self.launches()), 1)
+
     def test_missing_output_is_fail(self):
         st = self.bridge("missing").build(self.jsx(), self.out / "illustrator_build.jsx")
         self.assertEqual(st.run["state"], "RETURNED_FILES_MISSING")
@@ -258,6 +284,7 @@ class TestPipelineAndCli(SimulatedLauncherCase):
             "ok": ("RETURNED_FILES_PRESENT", "NOT VERIFIED"),
             "error": ("SCRIPT_ERROR", "FAIL"),
             "missing": ("RETURNED_FILES_MISSING", "FAIL"),
+            "export_missing": ("SCRIPT_ERROR", "FAIL"),
             "refuse": ("REFUSED_BY_LAUNCHER", "NOT VERIFIED"),
         }
         for mode, (state, ai_prefix) in expect.items():
