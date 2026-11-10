@@ -10,6 +10,22 @@
     var BG = [255, 255, 255];
     var REGIONS = [{"color":[220,40,40],"loops":[[[65.0,30.0],[72.0,30.5],[77.0,31.5],[83.0,33.5],[93.0,39.5],[100.5,47.0],[101.5,49.0],[103.5,51.0],[106.5,57.0],[109.5,67.0],[110.0,75.0],[109.5,83.0],[107.5,91.0],[103.5,99.0],[101.5,102.0],[98.5,105.0],[97.5,107.0],[89.0,113.5],[81.0,117.5],[73.0,119.5],[65.0,120.0],[57.0,119.5],[53.0,118.5],[47.0,116.5],[38.0,111.5],[29.5,103.0],[25.5,97.0],[21.5,87.0],[20.0,75.5],[20.5,69.0],[22.5,60.0],[27.5,50.0],[29.5,48.0],[30.5,46.0],[37.0,39.5],[45.0,34.5],[50.0,32.5],[58.0,30.5]]]},{"color":[30,90,200],"loops":[[[130.0,25.0],[210.0,25.0],[210.0,75.0],[130.0,75.0]]]},{"color":[40,160,70],"loops":[[[182.5,88.0],[187.5,95.0],[191.5,99.0],[192.5,101.0],[196.5,105.0],[197.5,107.0],[206.5,117.0],[207.5,119.0],[215.5,128.0],[216.5,130.0],[220.5,134.0],[224.0,139.0],[183.0,140.0],[142.0,140.0],[142.5,137.0],[144.5,135.0],[145.5,133.0],[148.5,130.0],[149.5,128.0],[152.5,125.0],[157.5,118.0],[161.5,114.0],[162.5,112.0],[165.5,109.0],[166.5,107.0],[169.5,104.0],[170.5,102.0],[173.5,99.0],[178.5,92.0]]]}];
 
+    // Safety guard: never overwrite existing files. Checked before any
+    // document is created, so a conflict leaves Illustrator untouched.
+    // Only the new document created below is modified or saved; documents
+    // the user already has open are never accessed.
+    var targets = [OUT_AI, OUT_SVG, OUT_PNG];
+    var existing = [];
+    for (var t = 0; t < targets.length; t++) {
+        if (new File(targets[t]).exists) { existing.push(targets[t]); }
+    }
+    if (existing.length > 0) {
+        alert("illustrator-ai-assistant: stopped without changes.\n" +
+              "These files already exist and will not be overwritten:\n" +
+              existing.join("\n"));
+        return;
+    }
+
     function rgb(c) {
         var col = new RGBColor();
         col.red = c[0]; col.green = c[1]; col.blue = c[2];

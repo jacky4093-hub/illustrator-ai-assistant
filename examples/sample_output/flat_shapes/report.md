@@ -1,7 +1,7 @@
 # Vector Fidelity Quality Report
 
 - Source: `examples/images/flat_shapes.png` (240x160, RGB)
-- Generated: 2026-11-10T14:33:58+0000 by vector-fidelity 0.1.0
+- Generated: 2026-11-10T14:47:21+0000 by vector-fidelity 0.1.0
 - Image class: **flat_graphic**
 - Strategy: color-region tracing (pixel-exact boundaries + RDP simplification)
 
@@ -19,6 +19,7 @@
 | text | NOT VERIFIED (no text detection in phase 1) |
 | human_review | PENDING |
 | overall | AWAITING_HUMAN_REVIEW |
+| outcome (machine-readable) | METRICS_PASS_NO_KNOWN_GAPS |
 
 > `ai_file` is NOT VERIFIED: phase 1 never runs Adobe Illustrator. `illustrator_build.jsx` is generated for manual execution only.
 

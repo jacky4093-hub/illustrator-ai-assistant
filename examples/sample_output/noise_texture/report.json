@@ -1,7 +1,7 @@
 {
   "tool": "vector-fidelity",
   "version": "0.1.0",
-  "generated_at": "2026-11-10T14:34:00+0000",
+  "generated_at": "2026-11-10T14:47:23+0000",
   "source": {
     "path": "examples/images/noise_texture.png",
     "width": 128,
@@ -94,5 +94,15 @@
     "illustrator_script": "NOT VERIFIED",
     "human_review": "PENDING",
     "overall": "FAILED"
+  },
+  "outcome": "FAILED",
+  "known_gaps": [
+    "photographic texture",
+    "gradients"
+  ],
+  "output_safety": {
+    "force": false,
+    "updated_existing": [],
+    "untouched_unknown_files": []
   }
 }

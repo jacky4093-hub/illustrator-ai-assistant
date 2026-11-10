@@ -14,12 +14,27 @@ from .analyze import (assign_labels, assign_labels_spatial, build_palette, choos
 from .compare import Thresholds, compare_images
 from .illustrator import build_jsx, get_bridge
 from .imageio import load_image, save_rgb
+from .outputs import ILLUSTRATOR_TARGETS, MAX_ITERATION_FILES, plan_outputs
 from .render import render, render_internal
 from .report import write_reports
 from .svg import validate_svg, write_svg
 from .trace import vectorize_labels
 
-MAX_ITERATIONS_CAP = 5
+MAX_ITERATIONS_CAP = MAX_ITERATION_FILES
+
+# Machine-readable outcome codes (also mapped to CLI exit codes in vf.py).
+OUTCOME_METRICS_PASS = "METRICS_PASS_NO_KNOWN_GAPS"      # still needs human review; .ai NOT VERIFIED
+OUTCOME_UNRESTORED = "INCOMPLETE_UNRESTORED"             # known unrestored aspects (e.g. gradients)
+OUTCOME_FIDELITY_FAIL = "INCOMPLETE_FIDELITY_FAIL"       # thresholds not met
+OUTCOME_FAILED = "FAILED"                                # no valid vector output
+
+
+def _overall_and_outcome(fidelity_passed: bool, limitations: list[str]) -> tuple[str, str]:
+    if limitations:
+        return "NEEDS_ATTENTION_UNRESTORED", OUTCOME_UNRESTORED
+    if not fidelity_passed:
+        return "NEEDS_ATTENTION", OUTCOME_FIDELITY_FAIL
+    return "AWAITING_HUMAN_REVIEW", OUTCOME_METRICS_PASS
 
 
 def _score(comp) -> float:
@@ -27,10 +42,14 @@ def _score(comp) -> float:
 
 
 def run(image_path: str | Path, out_dir: str | Path, max_iterations: int = 3,
-        renderer: str = "chromium", thresholds: Thresholds | None = None) -> dict:
+        renderer: str = "chromium", thresholds: Thresholds | None = None,
+        force: bool = False) -> dict:
     t0 = time.time()
     max_iterations = max(1, min(int(max_iterations), MAX_ITERATIONS_CAP))
-    out = Path(out_dir)
+    # All safety checks happen before anything is created or written;
+    # raises outputs.OutputConflictError on any conflict.
+    plan = plan_outputs(image_path, out_dir, force=force)
+    out = plan.out_dir
     out.mkdir(parents=True, exist_ok=True)
     th = thresholds or Thresholds()
 
@@ -54,7 +73,7 @@ def run(image_path: str | Path, out_dir: str | Path, max_iterations: int = 3,
             labels = assign_labels(img.rgb, palette)
         doc = vectorize_labels(labels, palette, eps, strategy.min_loop_area)
         svg_text = write_svg(doc)
-        svg_path = out / f"iter{it + 1}.svg"
+        svg_path = plan.path(f"iter{it + 1}.svg")
         svg_path.write_text(svg_text, encoding="utf-8")
         val = validate_svg(svg_text, img.width, img.height)
         rec = {"iteration": it + 1, "epsilon": eps, "palette_size": int(palette.shape[0]),
@@ -118,13 +137,17 @@ def run(image_path: str | Path, out_dir: str | Path, max_iterations: int = 3,
             "illustrator_script": "NOT VERIFIED", "human_review": "PENDING",
             "overall": "FAILED",
         }
+        result["outcome"] = OUTCOME_FAILED
+        result["known_gaps"] = list(strategy.expected_limitations)
+        result["output_safety"] = {"force": force, "updated_existing": plan.will_update,
+                                   "untouched_unknown_files": plan.existing_unknown}
         write_reports(result, out)
         return result
 
-    final_svg = out / "vector.svg"
+    final_svg = plan.path("vector.svg")
     final_svg.write_text(best["svg"], encoding="utf-8")
-    save_rgb(best["rendered"], out / "preview.png")
-    save_rgb(best["heat"], out / "diff_heatmap.png")
+    save_rgb(best["rendered"], plan.path("preview.png"))
+    save_rgb(best["heat"], plan.path("diff_heatmap.png"))
     # Cross-check: the internal rasterizer must agree with the main renderer.
     cross = None
     if best["renderer"] == "chromium":
@@ -134,10 +157,9 @@ def run(image_path: str | Path, out_dir: str | Path, max_iterations: int = 3,
                  "pixels_over_32": round(float((d.max(-1) > 32).mean()), 6)}
 
     bridge = get_bridge("script-export")
-    jsx_path = out / "illustrator_build.jsx"
-    jsx = build_jsx(best["doc"], str((out / "illustrator_output.ai").resolve()),
-                    str((out / "illustrator_output.svg").resolve()),
-                    str((out / "illustrator_output.png").resolve()))
+    jsx_path = plan.path("illustrator_build.jsx")
+    ai_t, svg_t, png_t = (str((out / n).resolve()) for n in ILLUSTRATOR_TARGETS)
+    jsx = build_jsx(best["doc"], ai_t, svg_t, png_t)  # refuses existing targets
     bstatus = bridge.build(jsx, jsx_path)
 
     comp = best["comp"]
@@ -182,18 +204,28 @@ def run(image_path: str | Path, out_dir: str | Path, max_iterations: int = 3,
     result["illustrator"] = bstatus.to_dict()
     result["human_review"] = {"status": "PENDING", "reasons": review_reasons,
                               "reviewer": None, "note": None, "decided_at": None}
+    limitations = list(strategy.expected_limitations)
+    overall, outcome = _overall_and_outcome(comp.passed, limitations)
+    if comp.passed:
+        fidelity = "PASS (metrics only)" if limitations else "PASS"
+    else:
+        fidelity = "FAIL"
+    result["outcome"] = outcome
+    result["known_gaps"] = limitations
+    result["output_safety"] = {"force": force, "updated_existing": plan.will_update,
+                               "untouched_unknown_files": plan.existing_unknown}
     result["status"] = {
         "svg_generated": "PASS",
         "svg_valid": "PASS" if best["validation"].ok else "FAIL",
         "svg_render": f"PASS ({best['renderer']})",
-        "fidelity": "PASS" if comp.passed else "FAIL",
+        "fidelity": fidelity,
         "ai_file": "NOT VERIFIED",
         "illustrator_script": "NOT VERIFIED",
         "gradients": ("NOT RESTORED (posterized)" if "gradients" in strategy.expected_limitations
                       else "none detected"),
         "text": "NOT VERIFIED (no text detection in phase 1)",
         "human_review": "PENDING",
-        "overall": "AWAITING_HUMAN_REVIEW" if comp.passed else "NEEDS_ATTENTION",
+        "overall": overall,
     }
     result["elapsed_seconds"] = round(time.time() - t0, 2)
     write_reports(result, out)
@@ -209,12 +241,15 @@ def record_review(out_dir: str | Path, approve: bool, reviewer: str, note: str) 
         "status": "APPROVED" if approve else "REJECTED", "reviewer": reviewer,
         "note": note, "decided_at": time.strftime("%Y-%m-%dT%H:%M:%S%z")})
     data["status"]["human_review"] = data["human_review"]["status"]
+    # Human approval never removes known gaps: "unrestored", "known_gaps",
+    # "outcome" and the per-item statuses (e.g. "gradients") are left as is.
+    known_gaps = data.get("known_gaps") or data.get("strategy", {}).get("expected_limitations") or []
     if not approve:
         data["status"]["overall"] = "REJECTED_BY_REVIEWER"
-    elif data["status"].get("fidelity") == "PASS":
+    elif known_gaps or data["status"].get("fidelity") != "PASS":
+        data["status"]["overall"] = "APPROVED_WITH_KNOWN_GAPS"
+    else:
         # The AI file stays NOT VERIFIED regardless of human approval.
         data["status"]["overall"] = "SVG_APPROVED_AI_NOT_VERIFIED"
-    else:
-        data["status"]["overall"] = "APPROVED_WITH_KNOWN_GAPS"
     write_reports(data, out)
     return data

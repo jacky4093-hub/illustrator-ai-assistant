@@ -1,7 +1,7 @@
 # Vector Fidelity Quality Report
 
 - Source: `examples/images/linear_gradient.png` (200x120, RGB)
-- Generated: 2026-11-10T14:33:59+0000 by vector-fidelity 0.1.0
+- Generated: 2026-11-10T14:47:22+0000 by vector-fidelity 0.1.0
 - Image class: **graphic_with_gradients**
 - Strategy: posterized color-region tracing (gradients approximated by flat bands)
 
@@ -12,13 +12,16 @@
 | svg_generated | PASS |
 | svg_valid | PASS |
 | svg_render | PASS (chromium) |
-| fidelity | PASS |
+| fidelity | PASS (metrics only) |
 | ai_file | NOT VERIFIED |
 | illustrator_script | NOT VERIFIED |
 | gradients | NOT RESTORED (posterized) |
 | text | NOT VERIFIED (no text detection in phase 1) |
 | human_review | PENDING |
-| overall | AWAITING_HUMAN_REVIEW |
+| overall | NEEDS_ATTENTION_UNRESTORED |
+| outcome (machine-readable) | INCOMPLETE_UNRESTORED |
+
+> **Not a full success:** known unrestored aspects: gradients. Metric PASS does not mean these were restored; human approval does not remove them.
 
 > `ai_file` is NOT VERIFIED: phase 1 never runs Adobe Illustrator. `illustrator_build.jsx` is generated for manual execution only.
 

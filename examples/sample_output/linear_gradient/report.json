@@ -1,7 +1,7 @@
 {
   "tool": "vector-fidelity",
   "version": "0.1.0",
-  "generated_at": "2026-11-10T14:33:59+0000",
+  "generated_at": "2026-11-10T14:47:22+0000",
   "source": {
     "path": "examples/images/linear_gradient.png",
     "width": 200,
@@ -265,13 +265,13 @@
     "svg_generated": "PASS",
     "svg_valid": "PASS",
     "svg_render": "PASS (chromium)",
-    "fidelity": "PASS",
+    "fidelity": "PASS (metrics only)",
     "ai_file": "NOT VERIFIED",
     "illustrator_script": "NOT VERIFIED",
     "gradients": "NOT RESTORED (posterized)",
     "text": "NOT VERIFIED (no text detection in phase 1)",
     "human_review": "PENDING",
-    "overall": "AWAITING_HUMAN_REVIEW"
+    "overall": "NEEDS_ATTENTION_UNRESTORED"
   },
   "best_iteration": 1,
   "final": {
@@ -508,5 +508,14 @@
     "note": null,
     "decided_at": null
   },
-  "elapsed_seconds": 1.23
+  "outcome": "INCOMPLETE_UNRESTORED",
+  "known_gaps": [
+    "gradients"
+  ],
+  "output_safety": {
+    "force": false,
+    "updated_existing": [],
+    "untouched_unknown_files": []
+  },
+  "elapsed_seconds": 1.14
 }

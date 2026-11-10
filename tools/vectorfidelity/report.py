@@ -18,6 +18,11 @@ def _md(result: dict) -> str:
     for k in ("svg_generated", "svg_valid", "svg_render", "fidelity", "ai_file",
               "illustrator_script", "gradients", "text", "human_review", "overall"):
         L.append(f"| {k} | {s.get(k, 'NOT VERIFIED')} |")
+    L.append(f"| outcome (machine-readable) | {result.get('outcome', 'n/a')} |")
+    if result.get("known_gaps"):
+        L += ["", "> **Not a full success:** known unrestored aspects: "
+              + ", ".join(result["known_gaps"])
+              + ". Metric PASS does not mean these were restored; human approval does not remove them."]
     L += ["", "> `ai_file` is NOT VERIFIED: phase 1 never runs Adobe Illustrator. "
           "`illustrator_build.jsx` is generated for manual execution only.", ""]
 

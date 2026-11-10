@@ -49,6 +49,13 @@ The scripts live in the plugin root, two directories above this file:
 3. **Run the pipeline** (output folder next to the user's work, never inside
    the plugin directory):
    `python3 <root>/tools/vf.py run <image> --out <out_dir> [--max-iterations 3]`
+   Use a new or empty `<out_dir>`. A non-empty directory is refused (exit 4,
+   nothing written). Only pass `--force` when the user explicitly asks to
+   update a previous run; it updates this tool's own files only, never the
+   source image, unknown files or existing `illustrator_output.*`.
+   Read the printed `outcome`: `METRICS_PASS_NO_KNOWN_GAPS` (exit 0) is the
+   only full metric success; `INCOMPLETE_UNRESTORED` / `INCOMPLETE_FIDELITY_FAIL`
+   (exit 3) and `FAILED` (exit 1) must be reported as not fully successful.
    It: keeps the exact pixel size and aspect ratio (viewBox = source size),
    builds the palette, traces each color region along pixel boundaries,
    smooths stair-steps, simplifies with Ramer-Douglas-Peucker, writes
@@ -62,7 +69,8 @@ The scripts live in the plugin root, two directories above this file:
    FAIL into a PASS.
 6. **Human confirmation**: ask the user to review. Record their decision:
    `python3 <root>/tools/vf.py review <out_dir> --approve|--reject --reviewer NAME --note TEXT`
-   Approval never changes `ai_file` from NOT VERIFIED.
+   Approval never changes `ai_file` from NOT VERIFIED, and approving a result
+   with known gaps yields `APPROVED_WITH_KNOWN_GAPS` (gaps stay listed).
 
 ## Fidelity thresholds (defaults)
 

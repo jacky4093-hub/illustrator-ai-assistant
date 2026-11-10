@@ -1,7 +1,7 @@
 {
   "tool": "vector-fidelity",
   "version": "0.1.0",
-  "generated_at": "2026-11-10T14:33:58+0000",
+  "generated_at": "2026-11-10T14:47:21+0000",
   "source": {
     "path": "examples/images/flat_shapes.png",
     "width": 240,
@@ -282,5 +282,12 @@
     "note": null,
     "decided_at": null
   },
-  "elapsed_seconds": 0.95
+  "outcome": "METRICS_PASS_NO_KNOWN_GAPS",
+  "known_gaps": [],
+  "output_safety": {
+    "force": false,
+    "updated_existing": [],
+    "untouched_unknown_files": []
+  },
+  "elapsed_seconds": 0.98
 }
