@@ -22,6 +22,15 @@ report states plainly which parts were not restored.
 6. Refines at most 3 times, logging the reason for each failure.
 7. Writes `report.md` / `report.json`, then waits for a human approve/reject decision.
 
+## Two modes
+
+- **Trace mode** (`vf.py run`): traces the whole image into color regions. Suits logos,
+  icons and flat illustrations.
+- **Compose mode** (`vf.py compose`): for price lists, stickers and signs. Text becomes
+  real text objects, boxes and arrows are native shapes, each icon is traced on its own,
+  and logos / QR codes are left as marked placeholders. It is driven by a layout spec
+  (see `examples/compose/`). The SVG has not been verified inside Illustrator.
+
 ## Layout
 
 ```
@@ -48,6 +57,7 @@ Nothing is installed automatically. Ask before installing anything.
 
 ```bash
 python3 tools/vf.py run path/to/image.png --out path/to/output
+python3 tools/vf.py compose path/to/layout_spec.json --out path/to/new_output
 python3 tools/vf.py review path/to/output --approve --reviewer NAME --note "checked"
 python3 -m unittest discover -s tests -v
 ```

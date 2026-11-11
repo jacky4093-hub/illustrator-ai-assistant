@@ -3,6 +3,7 @@
 
   python3 tools/vf.py analyze <image>
   python3 tools/vf.py run <image> --out <dir> [--max-iterations 3] [--renderer chromium|internal] [--force]
+  python3 tools/vf.py compose <layout_spec.json> --out <new_dir>
   python3 tools/vf.py validate <file.svg> [--width W --height H]
   python3 tools/vf.py review <out_dir> (--approve|--reject) --reviewer NAME [--note TEXT]
 
@@ -14,6 +15,12 @@ All processing is local. No image is uploaded anywhere.
   1  FAILED (no valid vector output)
   4  refused: output conflict, or Illustrator run not possible/approved (nothing was written)
   5  an Illustrator run was requested and did not end in "returned, files present"
+
+`compose` builds one SVG from a layout spec: real text objects, native shapes,
+separately traced icons and placeholder boxes (see SKILL.md, "Compose mode").
+It never contacts Illustrator and never overwrites: the output folder must be
+new or empty. Exit codes: 0 composed, 3 composed with placeholders left to
+replace, 1 invalid result, 4 refused (bad spec or output conflict).
 
 `--run-illustrator` (off by default, Windows only) runs the generated script
 once in Adobe Illustrator through COM. It needs `--approved-by NAME`: the
@@ -33,6 +40,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from vectorfidelity.compose import OUTCOME_COMPOSED, OUTCOME_INVALID, SpecError, compose  # noqa: E402
 from vectorfidelity.analyze import choose_strategy, classify, compute_stats, stats_to_dict  # noqa: E402
 from vectorfidelity.imageio import load_image  # noqa: E402
 from vectorfidelity.illustrator import get_execution_bridge  # noqa: E402
@@ -64,6 +72,9 @@ def main(argv=None) -> int:
                    help="name of the person who approved this Illustrator run")
     r.add_argument("--illustrator-timeout", type=float, default=180,
                    help="seconds to wait for Illustrator before reporting UNKNOWN_TIMEOUT")
+    c = sub.add_parser("compose")
+    c.add_argument("spec")
+    c.add_argument("--out", required=True)
     v = sub.add_parser("validate")
     v.add_argument("svg")
     v.add_argument("--width", type=int)
@@ -119,6 +130,25 @@ def main(argv=None) -> int:
         if outcome == OUTCOME_METRICS_PASS:
             return EXIT_OK
         return EXIT_FAILED if outcome == OUTCOME_FAILED else EXIT_INCOMPLETE
+    if args.cmd == "compose":
+        try:
+            res = compose(args.spec, args.out)
+        except SpecError as e:
+            print(json.dumps({"outcome": "REFUSED_BAD_SPEC", "error": str(e)}, indent=2,
+                             ensure_ascii=False))
+            return EXIT_REFUSED
+        except OutputConflictError as e:
+            print(json.dumps({"outcome": "REFUSED_OUTPUT_CONFLICT", "error": str(e),
+                              "conflicts": e.conflicts}, indent=2, ensure_ascii=False))
+            return EXIT_REFUSED
+        print(json.dumps({"outcome": res["outcome"], "ai_file_verified": False,
+                          "counts": res["counts"], "known_gaps": res["known_gaps"],
+                          "status": res["status"], "out": str(Path(args.out).resolve()),
+                          "report": str(Path(args.out, "compose_report.md"))}, indent=2,
+                         ensure_ascii=False))
+        if res["outcome"] == OUTCOME_COMPOSED:
+            return EXIT_OK
+        return EXIT_FAILED if res["outcome"] == OUTCOME_INVALID else EXIT_INCOMPLETE
     if args.cmd == "validate":
         res = validate_svg(Path(args.svg).read_text(encoding="utf-8"), args.width, args.height)
         print(json.dumps(res.to_dict(), indent=2))

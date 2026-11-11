@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "source": "price_card.png",
+  "background": "#ffffff",
+  "fonts": {
+    "title": {"family": "Arial-Black"},
+    "body": {"family": "ArialMT"},
+    "price": {"family": "Arial-BoldMT"}
+  },
+  "shapes": [
+    {"type": "rect", "group": "frames", "x": 10, "y": 10, "w": 460, "h": 60, "rx": 8, "fill": "#0d3b73"},
+    {"type": "rect", "group": "frames", "x": 20, "y": 90, "w": 230, "h": 110, "rx": 10, "fill": "#e6f3fb", "stroke": "#249ed3", "stroke_width": 2},
+    {"type": "line", "group": "frames", "x1": 20, "y1": 258, "x2": 460, "y2": 258, "stroke": "#249ed3", "stroke_width": 2}
+  ],
+  "texts": [
+    {"x": 30, "y": 52, "text": "WASH & DRY", "size": 34, "font": "title", "fill": "#ffffff"},
+    {"x": 40, "y": 130, "text": "Standard 25 kg", "size": 20, "font": "body", "fill": "#0d3b73"},
+    {"x": 40, "y": 180, "text": "$250", "size": 40, "font": "price", "fill": "#f79628"},
+    {"x": 20, "y": 240, "text": "Close the door before starting.", "size": 16, "font": "body", "fill": "#0d3b73"},
+    {"x": 240, "y": 284, "text": "Thank you!", "size": 18, "font": "body", "fill": "#249ed3", "anchor": "middle"}
+  ],
+  "icons": [
+    {"name": "basket", "box": [182, 138, 244, 194], "colors": 2},
+    {"name": "drop", "box": [302, 96, 358, 180], "colors": 2}
+  ],
+  "placeholders": [
+    {"name": "logo", "box": [386, 96, 454, 164], "note": "replace with the official logo file"}
+  ]
+}

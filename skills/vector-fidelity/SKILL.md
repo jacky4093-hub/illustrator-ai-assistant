@@ -33,7 +33,21 @@ The scripts live in the plugin root, two directories above this file:
 `<plugin-root>/tools/vf.py`. If `${CLAUDE_PLUGIN_ROOT}` is set, use
 `${CLAUDE_PLUGIN_ROOT}/tools/vf.py`.
 
-## Workflow
+## Choosing the mode
+
+Look at the image first, then pick one mode and tell the user which and why.
+
+| The image is mostly... | Mode |
+|---|---|
+| A logo, icon or flat illustration with little or no text | **Trace mode** ("Workflow" below) |
+| A price list, sticker, sign, label, menu or poster: many words, boxes, arrows, small icons | **Compose mode** |
+
+Whole-image tracing of a text-heavy layout fails: small text becomes
+unreadable shapes that cannot be edited. Do not offer it as the result for
+such images. If trace mode was tried and the report says FAIL because of
+text, switch to compose mode instead of retrying with a larger image.
+
+## Workflow (trace mode)
 
 1. **Inspect the image yourself** (Read it) and note: subject, number of
    distinct flat colors, gradients, text, transparency, fine detail.
@@ -72,6 +86,93 @@ The scripts live in the plugin root, two directories above this file:
    `python3 <root>/tools/vf.py review <out_dir> --approve|--reject --reviewer NAME --note TEXT`
    Approval never changes `ai_file` from NOT VERIFIED, and approving a result
    with known gaps yields `APPROVED_WITH_KNOWN_GAPS` (gaps stay listed).
+
+## Compose mode (text stays text, shapes are drawn, icons are traced one by one)
+
+The result is one SVG in which every piece of text is a real text object
+(editable type in Illustrator), boxes and arrows are native shapes, each
+icon is traced separately, and logos / QR codes are marked for replacement.
+You write a layout spec (JSON); `vf.py compose` builds and checks the SVG.
+
+1. **Split the image into four kinds of element** and say so to the user:
+   - **Text**: every word, number and price. Transcribe it exactly, one
+     line per text object. Never trace text.
+   - **Regular shapes**: panels, price boxes, frames, buttons, arrows,
+     dividers, bands, simple curves and gradients. Draw them as shapes.
+   - **Icons / pictograms**: anything pictorial. Give a crop box each.
+   - **Logos and QR codes**: never trace or redraw them. Add a placeholder
+     and tell the user to drop in the official logo file and to regenerate
+     the QR code from its URL (a traced QR code does not scan).
+2. **Fonts**: ask the user which fonts to use, or list the fonts installed
+   on their machine and propose close matches. Use the font's PostScript
+   name as `family` (for example `NotoSansTC-Bold`, `Arial-Black`). Add
+   `file` (path to the .ttf/.otf) when you know it, so the preview uses the
+   real font. The original typeface usually cannot be identified: say that
+   the fonts are substitutes.
+3. **Measure**: coordinates are source-image pixels, origin top-left. Text
+   `x`,`y` is the baseline start (or baseline centre / end with
+   `"anchor": "middle"` / `"end"`). View enlarged crops of the image to read
+   positions and sizes instead of guessing from the full view.
+4. **Write the spec** next to the user's work (not inside the plugin):
+
+   ```json
+   {
+     "version": 1,
+     "source": "sticker.png",
+     "background": "#ffffff",
+     "fonts": {"bold": {"family": "NotoSansTC-Bold", "file": "C:/Windows/Fonts/..."}},
+     "gradients": {"band": {"x1": 0, "y1": 0, "x2": 300, "y2": 0,
+                            "stops": [[0, "#d6eefb"], [1, "#5db9ec"]]}},
+     "shapes": [
+       {"type": "rect", "group": "frames", "x": 20, "y": 90, "w": 230, "h": 110,
+        "rx": 10, "fill": "#e6f3fb", "stroke": "#249ed3", "stroke_width": 2},
+       {"type": "polygon", "group": "arrows", "points": [[10,10],[40,10],[25,30]], "fill": "#f79628"},
+       {"type": "path", "group": "decor", "start": [20, 280], "fill": "gradient:band",
+        "segments": [["C", [100,260], [200,300], [300,270]], ["L", [300,290]]]}
+     ],
+     "texts": [
+       {"x": 40, "y": 180, "text": "$250", "size": 40, "font": "bold", "fill": "#f79628"}
+     ],
+     "icons": [
+       {"name": "basket", "box": [182, 138, 244, 194], "colors": 2}
+     ],
+     "placeholders": [
+       {"name": "logo", "box": [386, 96, 454, 164], "note": "replace with the official logo file"}
+     ]
+   }
+   ```
+
+   Shape types: `rect` (`rx` for rounded corners), `circle`, `ellipse`
+   (`rotate`), `line`, `polygon`, `path` (cubic Bézier `C` and line `L`
+   segments; use it for waves, swooshes and drops instead of tracing).
+   Colors are `#rrggbb`, `none`, or `gradient:<id>`. Text may have `stroke`
+   and `stroke_width` (stack several text objects for outlined titles).
+   Icon options: `colors` (2 to 8 solid colors, default 2), `palette`
+   (exact ink colors when you know them), `scale` (default 4),
+   `keep_background`. The icon background is the color along the edge of
+   its crop and is left out, so crop boxes must not cut through the icon or
+   include neighbouring text.
+   A complete small example: `<root>/examples/compose/price_card.spec.json`.
+5. **Build** into a new folder (never overwritten, a used folder is refused):
+   `python3 <root>/tools/vf.py compose <spec.json> --out <new_dir>`
+   Exit 0 = composed; 3 = composed but placeholders remain; 1 = invalid
+   SVG; 4 = refused (the message names the bad spec entry or the conflict).
+6. **Check `compare.png`** (original left, preview right) yourself. Fix the
+   spec and build again into another new folder. At most 3 rebuilds, then
+   show the user what still differs.
+7. **Report honestly** from `compose_report.md`:
+   - what is editable text, what was drawn, which icons were traced;
+   - every placeholder as NOT RESTORED;
+   - text content is transcribed by you: ask the user to proofread prices
+     and wording before printing;
+   - positions and sizes are estimates and fonts are substitutes;
+   - the preview is drawn with Pillow, not Illustrator: fonts without a
+     `file` use a stand-in and gradients show as one flat color.
+8. **Hand over**: the user opens `composed.svg` in Illustrator with
+   File > Open, checks it, and saves it as `.ai`. Compose mode produces no
+   `.ai` file and no `.jsx`; `--run-illustrator` does not apply to it.
+   Whether Illustrator shows the text as editable type with the right fonts
+   is NOT VERIFIED until the user has looked. Ask them to tell you.
 
 ## Running Illustrator on Windows (optional, needs approval every time)
 
@@ -125,12 +226,18 @@ artwork". Always add your own visual judgement.
 `report.json`, `report.md`, `illustrator_build.jsx` (NOT VERIFIED),
 `iterN.svg` for each iteration. After an Illustrator run also
 `illustrator_run.json` (run record) and `illustrator_output.ai/.svg/.png`.
+Compose mode: `composed.svg`, `preview.png`, `compare.png`,
+`compose_report.json`, `compose_report.md`, `icons/<name>.svg`.
 
 ## Known phase-1 limits (always mention the relevant ones)
 
 - Straight line segments only (no Bézier fitting).
 - Gradients become flat bands (no vector gradients).
-- No text detection: lettering is traced as shapes, not editable text.
+- No text detection in trace mode: lettering is traced as shapes, not
+  editable text. Use compose mode for text.
+- Compose mode depends on your transcription and measurements; it has no
+  automatic text recognition, and its SVG has not been verified inside
+  Illustrator by the test suite.
 - Transparency is composited on white.
 - Sharp corners next to diagonal edges can be slightly shifted (< 1 px).
 - The automated Windows COM run is only simulated in the test suite. Treat
