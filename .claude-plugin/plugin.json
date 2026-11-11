@@ -2,7 +2,7 @@
   "name": "illustrator-ai-assistant",
   "displayName": "Illustrator AI Assistant",
   "version": "0.1.0",
-  "description": "Turn a reference image into a real, editable vector reconstruction (SVG paths), compare it against the original and report what was not restored. Phase 1: no Illustrator automation is executed; .ai output is prepared as an ExtendScript file and is NOT VERIFIED.",
+  "description": "Turn a reference image into real, editable vector paths and a validated SVG, compare it against the original and report what was not restored. On Windows with Adobe Illustrator installed, and only after explicit human approval for each run, it runs the generated ExtendScript (.jsx) through a PowerShell COM launcher so Illustrator writes an editable .ai file plus SVG and PNG exports. Missing exports are reported as failures and never retried. Results are not guaranteed to match the source exactly, and every .ai file stays NOT VERIFIED until a person has checked it in Illustrator.",
   "author": {
     "name": "jacky4093-hub"
   },

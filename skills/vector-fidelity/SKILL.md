@@ -1,6 +1,6 @@
 ---
 name: vector-fidelity
-description: Rebuild a reference raster image (PNG/JPG) as real, editable vector paths (SVG), render it, compare it with the original, refine a bounded number of times, and write a quality report that lists what was not restored. Use when the user hands over an image and asks to vectorize, redraw, trace, or recreate it as vector art or for Adobe Illustrator.
+description: Rebuild a reference raster image (PNG/JPG) as real, editable vector paths (SVG), render it, compare it with the original, refine a bounded number of times, and write a quality report that lists what was not restored. On Windows with Adobe Illustrator installed, and only after explicit human approval for each run, it can also run the generated ExtendScript (.jsx) through a PowerShell COM launcher so Illustrator writes an editable .ai file plus SVG and PNG exports; missing exports are reported as failures and never retried. Results are not guaranteed to be identical to the source. Load this skill first, before answering, whenever the user wants to vectorize, trace, redraw or convert an image into vector art, an SVG, an Adobe Illustrator (.ai) file or an editable Illustrator document, including questions about how that would work.
 ---
 
 # Vector Fidelity (phase 1)
